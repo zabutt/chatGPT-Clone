@@ -2,8 +2,7 @@ from openai import OpenAI
 import streamlit as st
 
 st.set_page_config(page_title="ChatGPT-like clone", page_icon="🤖")
-
-st.title("ChatGPT-like clone by Zulfiqar")
+st.title("ChatGPT-like clone")
 
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
@@ -14,15 +13,15 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 
 for message in st.session_state.messages:
-    with st.beta_expander(message["role"], expanded=False):
+    with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-if prompt := st.text_input("Ask me anything"):
+if prompt := st.chat_input("What is up?"):
     st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.beta_expander("Your question", expanded=False):
+    with st.chat_message("user"):
         st.markdown(prompt)
 
-    with st.spinner("Thinking..."):
+    with st.chat_message("assistant"):
         stream = client.chat.completions.create(
             model=st.session_state["openai_model"],
             messages=[
@@ -32,9 +31,4 @@ if prompt := st.text_input("Ask me anything"):
             stream=True,
         )
         response = st.write_stream(stream)
-
-    with st.beta_expander("My answer", expanded=False):
-        st.markdown(response)
-
     st.session_state.messages.append({"role": "assistant", "content": response})
-
